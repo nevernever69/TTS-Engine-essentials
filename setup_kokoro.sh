@@ -28,9 +28,18 @@ fi
 
 cd "$APP_DIR"
 
-echo "=== 🐍 Installing Python dependencies ==="
+# ✅ Ensure uv venv is created
+if [ ! -d ".venv" ]; then
+    echo "⚙️ Creating Python virtual environment..."
+    uv venv
+fi
+
+echo "💡 Activating virtual environment..."
+source .venv/bin/activate
+
+echo "📦 Installing Python dependencies..."
 uv pip install -e ".[cpu]"
-pip install uvicorn loguru
+uv pip install uvicorn loguru
 
 echo "=== 🔧 Creating systemd service ==="
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
@@ -47,6 +56,7 @@ WorkingDirectory=$APP_DIR
 ExecStart=$START_SCRIPT
 Restart=always
 RestartSec=5
+Environment=PATH=$APP_DIR/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 
 [Install]
 WantedBy=multi-user.target
